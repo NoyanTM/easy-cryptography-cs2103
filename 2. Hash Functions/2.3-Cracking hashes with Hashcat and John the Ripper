@@ -1,0 +1,10 @@
+sudo apt-get install hashcat && sudo apt-get install john
+
+hashcat -h
+
+john -h
+
+sudo unshadow /etc/passwd /etc/shadow > hashes.txt
+john hashes.txt
+
+hashcat -m 0 -a 0 hashes.txt /path/to/wordlist.txt
