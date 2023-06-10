@@ -1,0 +1,38 @@
+#1. Signing CSR using openssl x509:
+openssl x509 -req \
+	-days 30 \
+	-in domain_request.csr \
+	-signkey domain_key.pem \
+	-out domain_cert.crt
+
+#2. Human-readable format for viewing:
+openssl x509 -in domain_cert.crt -text
+
+#3. Creating identity for 127.0.0.1 (localhost):
+openssl genpkey \
+	- algorithm EC \
+	-out localhost_key.pem \
+	-pkeyopt ec_paramgen_curve:P-256
+
+openssl req - new -key localhost_key.pem -out localhost_request.csr
+
+#Creating v3.ext extension file for "Key Usage" and "Basic Constraints" parameters:
+KeyUsage=digitalSignature
+basicConstraints=CA:FALSE
+
+#Signing the CSR:
+openssl x509 -req \
+	-days 365 \
+	-in localhost_request.csr \
+	-CAkey domain_key.pem \
+	-CA domain_cert.crt \
+	-out localhost_cert.crt \
+	-set_serial 123456789 \
+	-extfile v3.ext
+
+#Setting up server for certified localhost identity:
+openssl s_server -accept 8888 -www \
+	-cert localhost_cert.pem -key localhost_key.pem \
+	-cert_chain domain_cert.crt -build_chain
+
+#Now visit https://127.0.0.1:8888 on browser. Then check the properties of the certificate.
