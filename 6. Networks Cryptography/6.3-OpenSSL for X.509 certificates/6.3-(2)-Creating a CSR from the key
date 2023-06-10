@@ -1,0 +1,2 @@
+openssl req -new -key domain_key.pem -out domain_request.csr
+openssl req -in domain_request.csr -text
